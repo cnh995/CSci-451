@@ -1,0 +1,77 @@
+HW-3	CS451	20 points	Due: September 22
+
+In the middle of a major battle, General Harley Davidson needs to 
+send an urgent message to Milwaukee headquarters. He finds 2 soldiers 
+and gives each one of them a part of the message and sends them off 
+on expendible sport bikes. When they arrive at headquarters, the 
+message is put back together.
+
+Write a program to put this message back together. Each of the 2 
+soldiers must be implemented as a thread (hence, 2 threads) and each 
+thread will read its part of the message from a file (thus, there 
+will be two files - one for each soldier). Each thread will concatentate 
+on to a single global character array forming the final message. 
+When the message is put back together the main function will output 
+the message to the screen. Therefore, your threads will have to watch
+for their respective FEOFs to know when to quit. Once both threads have 
+quit the main function will know the message has been put back together.
+
+The trick is to use a critical section control technique (or make one 
+up) to control which thread gets to append its character onto the 
+global character array. Note that a strict alternation method will **NOT** 
+work.
+
+Note that the two files will have 0's (numeric zero) to indicate where the
+applicable thread should wait for the other thread.
+
+Example: “thisisatest”
+
+Person1         Person2          
+---------       ---------- 
+t		0
+0		h
+i		0
+s		0
+0		i
+0		s
+0		a
+t		0
+e		0
+0		s
+t		0
+
+I suggest you test your program with a longer set of data files as we will 
+use a test set that may be up to 1000 characters (500 in each file).
+
+The main program can only set the global flag and call the threads -
+NOTHING ELSE! If you cheat by having the main program do anything that
+circumvents the role of the threads you will receive a zero (0).
+
+Your code cannot simply read the data files into an array and seperate
+them - that would not be a critical section problem. You must read each 
+character (1 at a time) and append them on to the global character array
+as each character is read.
+
+This is tricky as your code might work once fine, but not the second time.
+TEST YOUR CODE MULTIPLE TIMES!
+
+SUGGESTIONS:
+------------
+1) See the man pages for PTHREAD_CREATE and PTHREAD_EXIT.
+
+2) Don't forget to include the pthread library when you compile the 
+program (-lpthread).
+
+3) Use a mutex. It will make things easier.
+
+
+REQUIREMENTS:
+-------------
+1. Your program must run in Streibel 109.
+
+2. Your full name must appear as a comment at the beginning of your 
+   program.
+
+3. Your source code must be named hw3-yourname.c
+
+3. Email your source (subject hw3-yourname) to rmarsh@cs.und.edu
