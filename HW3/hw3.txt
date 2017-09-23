@@ -24,7 +24,7 @@ work.
 Note that the two files will have 0's (numeric zero) to indicate where the
 applicable thread should wait for the other thread.
 
-Example: ìthisisatestî
+Example: ‚Äúthisisatest‚Äù
 
 Person1         Person2          
 ---------       ---------- 

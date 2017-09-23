@@ -1,110 +1,114 @@
 //Christian Hansen
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
+#include<stdio.h>
+#include<string.h>
+#include<pthread.h>
+#include<stdlib.h>
+#include<unistd.h>
 
-//Character array containing our message
-char* message[1000];
-int switchingIndex = 0;
-
-//Thread to read data from Person1.txt
-void* readPerson1(void* arg)
+typedef struct
 {
-	FILE *input = fopen("Person1.txt", "r");
+	char *message;
+}MESSAGE;
+
+MESSAGE myMessage;
+pthread_t tid[2];
+int messageIndex;
+pthread_mutex_t lock;
+
+void* readPerson1(void *arg)
+{
+	int i = 0;
 	char tempChar;
+	FILE *input = fopen("Person1", "r");
+	tempChar = getc(input);
 
-	while(!feof(input))
+	while (tempChar != EOF)
 	{
-		fscanf(input, "%c", &tempChar);
-
-		if(tempChar != '0')
+		pthread_mutex_lock(&lock);
+		for(i; i < messageIndex; i++)
 		{
-			//Adding the characters to the array isn't working for some reason
-			//message[switchingIndex] = &tempChar;
-			//switchingIndex++;
-
-			//To show that the characters are being read correctly
-			printf("%c", tempChar);
+			tempChar = fgetc(input);
+			if(tempChar == '\n')
+				tempChar = fgetc(input);
+			if(tempChar == EOF)
+				break;
 		}
+
+		while((tempChar != EOF) && (tempChar != '0'))
+		{
+			if(tempChar != '\n')
+			{
+				myMessage.message[messageIndex] = tempChar;
+				tempChar = getc(input);
+				i++;
+
+				if(tempChar != '0')
+					messageIndex++;
+			}
+			else
+				tempChar = getc(input);
+		}
+		pthread_mutex_unlock(&lock);
 	}
+
+	fclose(input);
+	return NULL;
 }
 
-//Thread to read data from Person2.txt
-void* readPerson2(void* arg)
+void* readPerson2(void *arg)
 {
-	FILE *input = fopen("Person2.txt", "r");
-
+	int i = 0;
 	char tempChar;
-			//To show that the characters are being read correctly
-			printf("%c", tempChar);
+	FILE *input = fopen("Person2", "r");
+	tempChar = getc(input);
+
+	while (tempChar != EOF)
+	{
+		pthread_mutex_lock(&lock);
+		for(i; i < messageIndex; i++)
+		{
+			tempChar = fgetc(input);
+			if(tempChar == '\n')
+				tempChar = fgetc(input);
+			if(tempChar == EOF)
+				break;
 		}
+
+		while((tempChar != EOF) && (tempChar != '0'))
+		{
+			if(tempChar != '\n')
+			{
+				myMessage.message[messageIndex] = tempChar;
+				tempChar = getc(input);
+				i++;
+
+				if(tempChar != '0')
+					messageIndex++;
+			}
+			else
+				tempChar = getc(input);
+		}
+		pthread_mutex_unlock(&lock);
 	}
+
+	fclose(input);
+	return NULL;
 }
 
 int main(void)
 {
-	pthread_t tid1;
-	pthread_attr_t attr1;
-	pthread_attr_init(&attr1);
-	pthread_create(&tid1, &attr1, readPerson1, &switchingIndex);
-	pthread_join(tid1, NULL);
+	myMessage.message = (char*)malloc(501*sizeof(char));
+	messageIndex = 0;
 
-	pthread_t tid2;
-	pthread_attr_t attr2;
-	pthread_attr_init(&attr2);
-	pthread_create(&tid2, &attr2, readPerson2, &switchingIndex);
-	pthread_join(tid2, NULL);
+	pthread_create(&(tid[0]), NULL, &readPerson1, NULL);
+	pthread_create(&(tid[1]), NULL, &readPerson2, NULL);
 
-	//Printing the message doesn't work
-	/*int i = 0;
+	pthread_join(tid[0], NULL);
+	pthread_join(tid[1], NULL);
+	pthread_mutex_destroy(&lock);
 
-	while(message[i] != '\0')
-	{
-		printf("%c", *message[i]);
-		i++;
-	}*/
-
-	return 0;
-}
-	while(!feof(input))
-	{
-		fscanf(input, "%c", &tempChar);
-
-		if(tempChar != '0')
-		{
-			//Adding the characters to the array isn't working for some reason
-			//message[switchingIndex] = &tempChar;
-			//switchingIndex++;
-
-			//To show that the characters are being read correctly
-			printf("%c", tempChar);
-		}
-	}
-}
-
-int main(void)
-{
-	pthread_t tid1;
-	pthread_attr_t attr1;
-	pthread_attr_init(&attr1);
-	pthread_create(&tid1, &attr1, readPerson1, &switchingIndex);
-	pthread_join(tid1, NULL);
-
-	pthread_t tid2;
-	pthread_attr_t attr2;
-	pthread_attr_init(&attr2);
-	pthread_create(&tid2, &attr2, readPerson2, &switchingIndex);
-	pthread_join(tid2, NULL);
-
-	//Printing the message doesn't work
-	/*int i = 0;
-
-	while(message[i] != '\0')
-	{
-		printf("%c", *message[i]);
-		i++;
-	}*/
+	printf("%s\n", myMessage.message);
 
 	return 0;
 }
