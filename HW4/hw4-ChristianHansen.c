@@ -5,34 +5,29 @@
 #include<stdlib.h>
 
 int globalInt;
-enum {state1, state2} state = state1;
+int state;
 pthread_t tid[2];
-pthread_mutex_t lock;
-pthread_cond_t cond1 = PTHREAD_COND_INITIALIZER;
-pthread_cond_t cond2 = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t lock1, lock2;
 
 void* thread1(void *arg)
 {
-	int i = 0;
+	int i = 1;
 	int tempInt;
 	FILE *input = fopen("hw4.in", "r");
 
-	while(!feof(input))
+	while(i == 1)
 	{
-		pthread_mutex_lock(&lock);
+		pthread_mutex_lock(&lock1);
 
-		while(state != state1)
-			pthread_cond_wait(&cond1, &lock);
+		if(state == 0)
+			state++;
 
+		i = fscanf(input, "%d\n", &globalInt);
 
-		fscanf(input, "%d\n", &globalInt);
-		printf("%d\n", globalInt);
-
-		//pthread_mutex_lock(&lock);
-		state = state2;
-		pthread_cond_signal(&cond2);
-		pthread_mutex_unlock(&lock); printf("\nnow\n");
+		pthread_mutex_unlock(&lock2);
 	}
+
+	state++;
 
 	fclose(input);
 	return NULL;
@@ -40,33 +35,32 @@ void* thread1(void *arg)
 
 void* thread2(void *output)
 {
-	pthread_mutex_lock(&lock);
-
-	while(state != state2)
-		pthread_cond_wait(&cond2, &lock);
-
-	if(2 % 2 == 0)
-		printf("\n%d", globalInt);
-
-	if(globalInt % 2 != 0)
-	{printf("\nhere\n");
-		fprintf(output, "%d\n", globalInt);
-	}
-	else
+	while(state <= 1)
 	{
-		fprintf(output, "%d\n", globalInt);
-		fprintf(output, "%d\n", globalInt);
-	}
+		pthread_mutex_lock(&lock2);
+		if(state == 1)
+		{
+			if(globalInt % 2 != 0)
+			{
+				fprintf(output, "%d\n", globalInt);
+			}
+			else
+			{
+				fprintf(output, "%d\n", globalInt);
+				fprintf(output, "%d\n", globalInt);
+			}
+		}
 
-	state = state1;
-	pthread_cond_signal(&cond1);
-	pthread_mutex_unlock(&lock);
+		pthread_mutex_unlock(&lock1);
+	}
 
 	return NULL;
 }
 
 int main(void)
 {
+	state = 0;
+
 	FILE* output = fopen("hw4.out", "w");
 
 	pthread_create(&(tid[0]), NULL, &thread1, NULL);
@@ -75,7 +69,8 @@ int main(void)
 	pthread_join(tid[0], NULL);
 	pthread_join(tid[1], NULL);
 
-	pthread_mutex_destroy(&lock);
+	pthread_mutex_destroy(&lock1);
+	pthread_mutex_destroy(&lock2);
 
 	fclose(output);
 
