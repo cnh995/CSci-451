@@ -16,7 +16,7 @@ void* thread1(void *arg)
 	int i = 1;
 	int tempInt;
 	FILE *input = fopen("hw5-1.in", "r");
-printf("\nhere1\n");
+
 	while(i == 1 && globalFlag == 0)
 	{
 		pthread_mutex_lock(&lock1);
@@ -25,19 +25,21 @@ printf("\nhere1\n");
 		{
 			i = fscanf(input, "%c\n", &globalChar);
 
-			if(i == 0 || globalChar == '\0')
-				globalFlag = 1;
+			if(i == -1 || globalChar == '\0')
+			{
+				globalFlag++;
+				fclose(input);
+				state++;
+				pthread_mutex_unlock(&lock2);
+				return NULL;
+			}
 			else
 			{
 				printFlag = 1;
 				pthread_mutex_unlock(&lockMain);
 			}
-
-			printf("1 %c\n", globalChar);
 		}
 	}
-
-	state++;
 
 	fclose(input);
 	return NULL;
@@ -48,8 +50,8 @@ void* thread2(void *output)
 	int i = 1;
 	int tempInt;
 	FILE *input = fopen("hw5-2.in", "r");
-printf("\nhere2\n");
-	while(i == 1 && globalFlag == 0)
+
+	while(i == 1 && globalFlag < 2)
 	{
 		pthread_mutex_lock(&lock2);
 
@@ -57,19 +59,21 @@ printf("\nhere2\n");
 		{
 			i = fscanf(input, "%c\n", &globalChar);
 
-			if(i == 0 || globalChar == '\0')
-				globalFlag = 1;
+			if(i == -1 || globalChar == '\0')
+			{
+				globalFlag++;
+				fclose(input);
+				state++;
+				pthread_mutex_unlock(&lock3);
+				return NULL;
+			}
 			else
 			{
 				printFlag = 1;
 				pthread_mutex_unlock(&lockMain);
 			}
-
-			printf("2 %c\n", globalChar);
 		}
 	}
-
-	state++;
 
 	fclose(input);
 	return NULL;
@@ -80,8 +84,8 @@ void* thread3(void *output)
 	int i = 1;
 	int tempInt;
 	FILE *input = fopen("hw5-3.in", "r");
-printf("\nhere3\n");
-	while(i == 1 && globalFlag == 0)
+
+	while(i == 1 && globalFlag < 3)
 	{
 		pthread_mutex_lock(&lock3);
 
@@ -89,19 +93,21 @@ printf("\nhere3\n");
 		{
 			i = fscanf(input, "%c\n", &globalChar);
 
-			if(i == 0 || globalChar == '\0')
-				globalFlag = 1;
+			if(i == -1 || globalChar == '\0')
+			{
+				globalFlag++;
+				fclose(input);
+				state++;
+				pthread_mutex_unlock(&lockMain);
+				return NULL;
+			}
 			else
 			{
 				printFlag = 1;
 				pthread_mutex_unlock(&lockMain);
 			}
-
-			printf("3 %c\n", globalChar);
 		}
 	}
-
-	state++;
 
 	fclose(input);
 	return NULL;
@@ -115,35 +121,36 @@ int main(void)
 	pthread_create(&(tid[1]), NULL, &thread2, NULL);
 	pthread_create(&(tid[2]), NULL, &thread3, NULL);
 
-	while(globalFlag == 0)
+	while(globalFlag < 3)
 	{
 		pthread_mutex_lock(&lockMain);
 
-		if(printFlag == 1)
+		if(printFlag == 1 && globalFlag < 3)
 		{
 			if(globalChar == '\0')
 				break;
 
-			fprintf(output, "%c\n", globalChar);printf("\nhere print\n");
-
+			fprintf(output, "%c\n", globalChar);
 			printFlag = 0;
 		}
 
-		if(state == 1)
+		if(state == 1 && globalFlag < 2)
 		{
-			state = 2;
+			state++;
 			pthread_mutex_unlock(&lock2);
 		}
-		else if(state == 2)
+		else if(state == 2 && globalFlag < 3)
 		{
-			state = 3;
+			state++;
 			pthread_mutex_unlock(&lock3);
 		}
-		else if(state == 3 || state == 0)
+		else if((state == 3 || state == 0) && globalFlag < 1)
 		{
 			state = 1;
 			pthread_mutex_unlock(&lock1);
 		}
+		else if(state == 4)
+			break;
 	}
 
 	pthread_join(tid[0], NULL);
