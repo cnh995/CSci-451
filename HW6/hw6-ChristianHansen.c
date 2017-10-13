@@ -130,12 +130,15 @@ void* thread4(void *arg)
 	
 				if(pages[i][1] == 1)
 				{
+					printf("Resetting R\n");
 					pages[i][1] = 0;
 					if(pages[i][2] == 1)
 					{
 						pages[i][2] = 0;
+						printf("Resetting M\n");
+						printf("Simulating print\n");
 						int wait = time(0) + 1;
-						while(time(0) < wait);printf("clearing pid %d, r %d, m %d\n", pages[i][0], pages[i][1], pages[i][2]);
+						while(time(0) < wait);
 					}
 					
 				}pages[i][0] = 0;
