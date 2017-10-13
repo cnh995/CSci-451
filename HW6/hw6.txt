@@ -1,0 +1,53 @@
+HW-6	CS451	10 points	Due: Friday, Oct. 13
+
+Another "thread" assignment, including memory management.
+
+PART 1.
+-------
+Write a program that uses 4 threads to manipulate the memory
+space using a NRU model.
+
+1. Create a simmulated memory space 5000 pages in size 
+(a 3 column array might do as all it *MUST* hold is the modifying 
+process ID, the R bit, and the M bit.
+
+2. Three threads (PID 100, 200 and 300) will each continuously 
+randomly generate a value between 0 and 4999 and a random value of 
+0 or 1. The first random value generated will indicate what page to 
+manipulate. The second random value generated will indicate what to 
+do to that page:
+    0 - means you read from it (set R bit).
+    1 - means you wrote to it (set R and M bits).
+
+3. Obviously, Whenever a thread randomly requests a page, if the 
+page is not claimed by anyone - OK. Mark the fields as required.
+However, if the page is claimed by somebody print out the text 
+"Page fault" and move on (look for a new random page).
+
+4. The fourth thread will act as a memory cleaner. It will continually
+scan the memory space looking for the first instance of the lowest class 
+memory (see class notes). During the scan, for every page we test. if the 
+page has the R bit set, the thread can simply reset the R bit to 0. If a
+page also has the M bit set, the thread must reset the M bit to 0 and 
+delay for 0.5 second (to simulate writing the page out to the harddrive).
+For the first instance of the lowest class page we find, set it's PID to 0.
+But, only do this once per memory scan.
+
+5. This may seem like an easy assignment, but you must recognize that the
+fourth thread will occasionally conflict with the other 3 threads (will 
+try to access an array element at the same time). Thus, you ***MUST*** 
+include some mechanism (mutex) to synchronize these threads.
+
+6. Include any extra comments/output that you think would help prove your
+code works as required.
+
+REQUIREMENTS:
+-------------
+1. Your program must run in Streibel 109/115.
+
+2. Your full name must appear as a comment at the beginning of your 
+   program.
+
+3. Your source code must be named hw6-yourname.c
+
+4. Email your source (subject hw6-yourname) to rmarsh@cs.und.edu 
