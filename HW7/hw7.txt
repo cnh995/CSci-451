@@ -1,0 +1,55 @@
+HW-7	CS451	10 points	Due: Friday, October 20
+
+On October 20, 1813 the Kingdom of Westphalia was abolished. 
+Shocking, I know.
+
+On October 20, 1864 US President Lincoln formally establishes 
+Thanksgiving as a national holiday. We will celebrate this 
+event with an assignment that is no turkey!
+
+For this assignment you need to write a program that spawns 
+10 threads, uses command-line arguments, and that reads and 
+writes files. 
+
+The command-line argument will be "mutex" or "nomutex". When
+running in "nomutex" mode the 10 threads will each read 1 word
+at a time from a file (hw7.data) and write that word to another
+file (hw7.nomutex). I suggest you include a sleep() to slow 
+things down a bit. After all, you do want the two versions to
+produce different results.
+
+When running in "mutex" mode any thread that wants to read a 
+word must first set a mutex, when the word is written to the 
+output file the mutex is released. The output filename here 
+is hw7.mutex.
+
+Output fle format (both files):
+word	<tab>	thread_number_that_wrote_word
+word	<tab>	thread_number_that_wrote_word
+word	<tab>	thread_number_that_wrote_word
+   .
+   .
+   .
+
+Input file format:
+word
+word
+word
+   .
+   .
+   .
+
+In your email, provide a brief analysis of the results (compare
+the two output files).
+
+REQUIREMENTS:
+-------------
+1. Your program MUST run on the cscluster.
+
+2. Your full name must appear as a comment at the beginning 
+   of your program.
+
+3. Your source code must be named hw7-yourname.c or 
+   hw7-yourname.cpp. Include a Makefile. 
+
+3. Email your source (subject hw7-yourname) to rmarsh@cs.und.edu 
